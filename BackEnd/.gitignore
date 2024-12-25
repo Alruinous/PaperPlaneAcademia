@@ -1,0 +1,15 @@
+# 忽略 Python 编译文件
+*.pyc
+__pycache__/
+
+# 忽略环境变量文件
+.env
+
+# 忽略数据库文件
+db.sqlite3
+
+# 忽略 Django 迁移文件
+*/migrations/*
+
+# 忽略 settings.py 文件
+PaperPlaneAcademiaBackEnd/PaperPlaneAcademiaBackEnd/settings.py

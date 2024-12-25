@@ -1,0 +1,50 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches:
+      - master  # 监听 master 分支的 push 操作
+  workflow_dispatch:  # 允许手动触发工作流
+
+jobs:
+  deploy:
+    name: Deploy Backend Code to Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy and migrate code on server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > deploy_key.pem
+          chmod 600 deploy_key.pem
+          ssh -o StrictHostKeyChecking=no -i deploy_key.pem root@113.44.138.144 << 'EOF'
+            # 进入项目目录
+            cd /www/wwwroot/BackEnd
+          
+            # 允许 Git 识别该目录为安全目录
+            git config --global --add safe.directory /www/wwwroot/BackEnd
+          
+            # 更新代码
+            git pull
+            echo "pull done"
+            
+            # 进入有 manage.py 的文件夹
+            cd /www/wwwroot/BackEnd/PaperPlaneAcademiaBackEnd
+          
+            # 确认 Python 和 Django 环境
+            python3 --version
+            pip show django
+          
+            # 创建数据库迁移文件
+            python3 manage.py makemigrations
+          
+            # 应用数据库迁移
+            python3 manage.py migrate
+          
+            # 重启服务（根据需要调整）
+            # pm2 restart all  # 如果使用 PM2 作为进程管理工具
+          EOF
